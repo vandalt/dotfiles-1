@@ -18,12 +18,8 @@ require('packer').startup(function()
   use 'tpope/vim-fugitive' -- Git commands in nvim
   use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
   use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
-  use 'tpope/vim-vinegar'
   use 'tpope/vim-surround'
-  use 'tpope/vim-unimpaired'
-  use 'tpope/vim-sleuth'
   use 'tpope/vim-repeat'
-  use 'ludovicchabant/vim-gutentags'
   use 'justinmk/vim-dirvish'
   use 'christoomey/vim-tmux-navigator'
   -- UI to select things (files, grep results, open buffers...)
@@ -40,12 +36,10 @@ require('packer').startup(function()
   use 'nvim-treesitter/nvim-treesitter'
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
-  -- use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
-  use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
-  use 'folke/which-key.nvim'
+  use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
+  -- use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
   use 'bfredl/nvim-luadev'
   use 'kristijanhusak/orgmode.nvim'
-  use 'LnL7/vim-nix'
   use 'ziglang/zig.vim'
 end)
 
@@ -271,71 +265,6 @@ vim.api.nvim_set_keymap('n', '<leader>lt', ':LspStop<CR>', { noremap = true, sil
 vim.api.nvim_set_keymap('n', '<leader>nu', ':PackerUpdate<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>nc', ':e $HOME/Repositories/nix/nix-dotfiles/home-manager/configs/neovim/init.lua<CR>', { noremap = true, silent = true })
 
-vim.cmd [[autocmd ColorScheme * highlight WhichKeyFloat guifg=ABB2BF guibg=282C34]]
-vim.cmd [[autocmd ColorScheme * highlight FloatBorder guifg=ABB2BF guibg=282C34]]
-vim.cmd [[highlight WhichKeyFloat guifg=ABB2BF guibg=282C34]]
-vim.cmd [[highlight FloatBorder guifg=ABB2BF guibg=282C34]]
-
-local wk = require 'which-key'
-
-wk.setup {
-  window = {
-    border = { '─', '─', '─', ' ', ' ', ' ', ' ', ' ' }, -- none, single, double, shadow
-    position = 'bottom', -- bottom, top
-    margin = { 0, 0, 0, 0 }, -- extra window margin [top, right, bottom, left]
-    padding = { 0, 0, 1, 0 }, -- extra window padding [top, right, bottom, left]
-  },
-}
-
--- As an example, we will the create following mappings:
---  * <leader>ff find files
---  * <leader>fr show recent files
---  * <leader>fb Foobar
--- we'll document:
---  * <leader>fn new file
---  * <leader>fe edit file
--- and hide <leader>1
-
-wk.register({
-  f = {
-    name = 'file', -- optional group name
-  },
-  b = {
-    name = 'buffer', -- optional group name
-  },
-  n = {
-    name = 'neovim', -- optional group name
-  },
-  s = {
-    name = 'search', -- optional group name
-  },
-  w = {
-    name = 'workspace', -- optional group name
-  },
-  q = {
-    name = 'quickfix', -- optional group name
-  },
-  g = {
-    name = 'git', -- optional group name
-  },
-  h = {
-    name = 'help/hunks', -- optional group name
-  },
-  ['?'] = 'which_key_ignore',
-  [';'] = 'which_key_ignore',
-  [','] = 'which_key_ignore',
-  ['<space>'] = 'which_key_ignore',
-  ['.'] = 'which_key_ignore',
-}, {
-  prefix = '<leader>',
-})
-
--- Make gutentags use ripgrep
--- --python-kinds=-iv
--- --exclude=build
--- --exclude=dist
-vim.g.gutentags_file_list_command = 'fd'
-
 -- remove conceal on markdown files
 vim.g.markdown_syntax_conceal = 0
 
@@ -515,6 +444,7 @@ local servers = {
   -- 'bashls',
   -- 'denols',
   -- 'rnix',
+  'ltex',
   'hls',
   'pyright',
   'yamlls',
@@ -527,9 +457,6 @@ for _, lsp in ipairs(servers) do
   nvim_lsp[lsp].setup {
     on_attach = on_attach,
     handlers = handlers,
-    -- flags = {
-    --   debounce_text_changes = 1000
-    -- }
   }
 end
 
@@ -586,19 +513,6 @@ nvim_lsp.texlab.setup {
     },
   },
 }
-
-nvim_lsp.ltex.setup {
-  on_attach = on_attach,
-  handlers = handlers,
-}
-
--- require('lint').linters_by_ft = {
---   markdown = { 'vale' },
---   zsh = { 'shellcheck' },
--- }
-
--- Trigger linting
--- vim.api.nvim_set_keymap('n', '<leader>bl', "<cmd>lua require('lint').try_lint()<CR>", { noremap = true, silent = true })
 
 local parser_config = require "nvim-treesitter.parsers".get_parser_configs()
 parser_config.org = {

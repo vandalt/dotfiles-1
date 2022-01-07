@@ -1,13 +1,20 @@
+export VOLTA_HOME=$HOME/.volta
+export DENO_INSTALL="/home/michael/.deno"
+
 # Set path
 typeset -U path
-path=($HOME/.config/emacs/bin
+path=(
       $HOME/.poetry/bin
-      $HOME/.cargo/bin
       $HOME/.local/bin
-      $HOME/n/bin
-      $HOME/.ghcup/bin
-      $HOME/.local/share/julia/bin
-      $path)
+      $HOME/.local/cargo/bin
+      $HOME/.local/juliaup/bin
+      $HOME/.local/ltex-ls/bin
+      $HOME/.local/lua-language-server/bin/Linux
+      $HOME/.local/neovim/bin
+      $VOLTA_HOME/bin
+      $DENO_INSTALL/bin
+      $path
+    )
 
 # Hook direnv
 emulate zsh -c "$(direnv export zsh)"
@@ -176,11 +183,15 @@ alias htop="btm -b"
 alias ls="ls --color=auto"
 alias ll="ls -alh --color=auto"
 alias l="ls --color=auto"
+alias cp='cp --reflink=auto'
+alias virsh-ips='virsh --connect qemu:///system net-dhcp-leases default'
 
 # FZF
 export FZF_DEFAULT_COMMAND='fd --type f'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 source "/usr/share/fzf/shell/key-bindings.zsh"
+source $HOME/.fzf_completion.zsh 
+
 
 # Set environmental variables
 export EDITOR="nvim"
@@ -199,6 +210,8 @@ export POWERLEVEL9K_MULTILINE_FIRST_PROMPT_SUFFIX=""
 export POWERLEVEL9K_MULTILINE_NEWLINE_PROMPT_SUFFIX=""
 export POWERLEVEL9K_MULTILINE_LAST_PROMPT_SUFFIX=""
 export POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(virtualenv anaconda direnv nix_shell)
+source $HOME/.local/powerlevel10k/powerlevel10k.zsh-theme
+source $HOME/.local/powerlevel10k/config/p10k-lean.zsh
 
 # Colorize terminal
 eval $( dircolors -b $HOME/.config/dircolors )
@@ -220,3 +233,4 @@ unset __conda_setup
 if [ -f "$HOME/.local/mambaforge/etc/profile.d/mamba.sh" ]; then
   . "$HOME/.local/mambaforge/etc/profile.d/mamba.sh"
 fi
+# <<< conda initialize <<<
