@@ -20,6 +20,7 @@ require('packer').startup(function()
   use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
   use 'tpope/vim-surround'
   use 'tpope/vim-repeat'
+  use 'tpope/vim-sleuth'
   use 'justinmk/vim-dirvish'
   use 'christoomey/vim-tmux-navigator'
   -- UI to select things (files, grep results, open buffers...)
@@ -40,6 +41,7 @@ require('packer').startup(function()
   -- use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
   use 'bfredl/nvim-luadev'
   use 'kristijanhusak/orgmode.nvim'
+  use 'mhartington/formatter.nvim'
   use 'ziglang/zig.vim'
 end)
 
@@ -412,25 +414,27 @@ local on_attach = function(_, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua vim.diagnostic.setloclist()<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>Q', '<cmd>lua vim.diagnostic.setqflist()<CR>', opts)
 
-  FormatRange = function()
-    local start_pos = vim.api.nvim_buf_get_mark(0, '<')
-    local end_pos = vim.api.nvim_buf_get_mark(0, '>')
-    vim.lsp.buf.range_formatting({}, start_pos, end_pos)
-  end
+  -- FormatRange = function()
+  --   local start_pos = vim.api.nvim_buf_get_mark(0, '<')
+  --   local end_pos = vim.api.nvim_buf_get_mark(0, '>')
+  --   vim.lsp.buf.range_formatting({}, start_pos, end_pos)
+  -- end
 
-  vim.cmd [[
-    command! -range FormatRange  execute 'lua FormatRange()'
-  ]]
+  -- vim.cmd [[
+  --   command! -range FormatRange  execute 'lua FormatRange()'
+  -- ]]
 
-  vim.cmd [[
-    command! Format execute 'lua vim.lsp.buf.formatting()'
-  ]]
+  -- vim.cmd [[
+  --   command! Format execute 'lua vim.lsp.buf.formatting()'
+  -- ]]
 end
 
 local handlers = {
   ['textDocument/hover'] = function(...)
     local buf = vim.lsp.handlers.hover(...)
-    vim.api.nvim_buf_set_keymap(buf, 'n', 'K', '<Cmd>wincmd p<CR>', { noremap = true, silent = true })
+    if buf then
+      vim.api.nvim_buf_set_keymap(buf, 'n', 'K', '<Cmd>wincmd p<CR>', { noremap = true, silent = true })
+    end
   end
 }
 
@@ -460,6 +464,16 @@ for _, lsp in ipairs(servers) do
   }
 end
 
+-- nvim_lsp.ccls.setup {
+--   cmd = { "/home/michael/Repositories/ccls/build/ccls" },
+--   handlers = handlers,
+--   offset_encoding='utf-32',
+--   on_attach = function(client, bufnr)
+--     local opts = { noremap = true, silent = true }
+--     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
+--     client.offset_encoding = 'utf-32'
+--   end
+-- }
 -- Make runtime files discoverable to the server
 local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
@@ -510,6 +524,34 @@ nvim_lsp.texlab.setup {
         args = { '--synctex-forward', '%l:1:%f', '%p' },
         onSave = true,
       },
+    },
+  },
+}
+require('formatter').setup {
+  filetype = {
+    python = {
+      -- Configuration for psf/black
+      function()
+        return {
+          exe = 'black', -- this should be available on your $PATH
+          args = { '-' },
+          stdin = true,
+        }
+      end,
+    },
+    lua = {
+      function()
+        return {
+          exe = 'stylua',
+          args = {
+            -- "--config-path "
+            --   .. os.getenv("XDG_CONFIG_HOME")
+            --   .. "/stylua/stylua.toml",
+            '-',
+          },
+          stdin = true,
+        }
+      end,
     },
   },
 }
