@@ -26,7 +26,7 @@ require('packer').startup(function()
   -- UI to select things (files, grep results, open buffers...)
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
-  use 'joshdick/onedark.vim' -- Theme inspired by Atom
+  -- use 'joshdick/onedark.vim' -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
   use 'arkav/lualine-lsp-progress' -- Integration with progress notifications
   -- Add indentation guides even on blank lines
@@ -38,6 +38,7 @@ require('packer').startup(function()
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
+  use '/home/michael/Repositories/neovim_development/onedark.nvim'
   -- use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
   use 'bfredl/nvim-luadev'
   use 'kristijanhusak/orgmode.nvim'
@@ -75,6 +76,10 @@ vim.cmd [[colorscheme onedark]]
 
 -- Set completeopt
 vim.o.completeopt = 'menuone,noinsert'
+
+--Use filetype.lua
+vim.g.do_filetype_lua = 1
+vim.g.did_load_filetypes = 0
 
 --Add spellchecking
 vim.cmd [[ autocmd FileType gitcommit setlocal spell ]]
@@ -138,10 +143,12 @@ vim.cmd [[
 --Add map to enter paste mode
 vim.o.pastetoggle = '<F3>'
 
-vim.g.indent_blankline_char = '┊'
-vim.g.indent_blankline_filetype_exclude = { 'help', 'packer' }
-vim.g.indent_blankline_buftype_exclude = { 'terminal', 'nofile' }
-vim.g.indent_blankline_show_trailing_blankline_indent = false
+require("indent_blankline").setup {
+  char = '┊',
+  filetype_exclude = { 'help', 'packer' },
+  buftype_exclude = { 'terminal', 'nofile' },
+  show_trailing_blankline_indent = false,
+}
 
 -- Toggle to disable mouse mode and indentlines for easier paste
 ToggleMouse = function()
@@ -176,11 +183,11 @@ vim.api.nvim_set_keymap('n', '<leader>bm', '<cmd>lua ToggleMouse()<cr>', { norem
 -- Gitsigns
 require('gitsigns').setup {
   signs = {
-    add = { hl = 'GitGutterAdd', text = '+' },
-    change = { hl = 'GitGutterChange', text = '~' },
-    delete = { hl = 'GitGutterDelete', text = '_' },
-    topdelete = { hl = 'GitGutterDelete', text = '‾' },
-    changedelete = { hl = 'GitGutterChange', text = '~' },
+    add = { text = '+' },
+    change = { text = '~' },
+    delete = { text = '_' },
+    topdelete = { text = '‾' },
+    changedelete = { text = '~' },
   },
 }
 
@@ -204,14 +211,16 @@ require('telescope').setup {
   },
 }
 require('telescope').load_extension 'fzf'
+
 --Add leader shortcuts
-vim.api.nvim_set_keymap('n', '<leader>f', [[<cmd>lua require('telescope.builtin').find_files({previewer = false})<cr>]], { noremap = true, silent = true })
-vim.api.nvim_set_keymap(
-  'n',
-  '<leader><space>',
-  [[<cmd>lua require('telescope.builtin').buffers({sort_lastused = true})<cr>]],
-  { noremap = true, silent = true }
-)
+function TelescopeFiles()
+  local opts = { previewer = false }
+  local ok = pcall(require"telescope.builtin".git_files, opts)
+  if not ok then require"telescope.builtin".find_files(opts) end
+end
+
+vim.api.nvim_set_keymap('n', '<leader>f', [[<cmd>lua TelescopeFiles()<cr>]], { noremap = true, silent = true })
+vim.api.nvim_set_keymap( 'n', '<leader><space>', [[<cmd>lua require('telescope.builtin').buffers({sort_lastused = true})<cr>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>sb', [[<cmd>lua require('telescope.builtin').current_buffer_fuzzy_find()<cr>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>h', [[<cmd>lua require('telescope.builtin').help_tags()<cr>]], { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<leader>st', [[<cmd>lua require('telescope.builtin').tags()<cr>]], { noremap = true, silent = true })
@@ -464,16 +473,6 @@ for _, lsp in ipairs(servers) do
   }
 end
 
--- nvim_lsp.ccls.setup {
---   cmd = { "/home/michael/Repositories/ccls/build/ccls" },
---   handlers = handlers,
---   offset_encoding='utf-32',
---   on_attach = function(client, bufnr)
---     local opts = { noremap = true, silent = true }
---     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<Cmd>lua vim.lsp.buf.definition()<CR>', opts)
---     client.offset_encoding = 'utf-32'
---   end
--- }
 -- Make runtime files discoverable to the server
 local runtime_path = vim.split(package.path, ';')
 table.insert(runtime_path, 'lua/?.lua')
@@ -512,8 +511,7 @@ nvim_lsp.texlab.setup {
   on_attach = on_attach,
   handlers = handlers,
   settings = {
-    latex = {
-      rootDirectory = '.',
+    texlab = {
       build = {
         args = { '-pdf', '-interaction=nonstopmode', '-synctex=1', '-pvc' },
         forwardSearchAfter = true,
@@ -527,6 +525,7 @@ nvim_lsp.texlab.setup {
     },
   },
 }
+
 require('formatter').setup {
   filetype = {
     python = {
