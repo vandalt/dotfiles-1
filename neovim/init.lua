@@ -17,7 +17,7 @@ require('packer').startup(function()
   use 'wbthomason/packer.nvim' -- Package manager
   use 'tpope/vim-fugitive' -- Git commands in nvim
   use 'tpope/vim-rhubarb' -- Fugitive-companion to interact with github
-  use 'tpope/vim-commentary' -- "gc" to comment visual regions/lines
+  use 'numToStr/Comment.nvim'
   use 'tpope/vim-surround'
   use 'tpope/vim-repeat'
   use 'tpope/vim-sleuth'
@@ -26,7 +26,6 @@ require('packer').startup(function()
   -- UI to select things (files, grep results, open buffers...)
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use {'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
-  -- use 'joshdick/onedark.vim' -- Theme inspired by Atom
   use 'nvim-lualine/lualine.nvim' -- Fancier statusline
   use 'arkav/lualine-lsp-progress' -- Integration with progress notifications
   -- Add indentation guides even on blank lines
@@ -38,7 +37,7 @@ require('packer').startup(function()
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig' -- Collection of configurations for built-in LSP client
-  use '/home/michael/Repositories/neovim_development/onedark.nvim'
+  use 'mjlbach/onedark.nvim'
   -- use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
   use 'bfredl/nvim-luadev'
   use 'kristijanhusak/orgmode.nvim'
@@ -108,9 +107,8 @@ require('lualine').setup {
   },
 }
 
---Fire, walk with me
-vim.opt.guifont = 'Monaco:h18'
-vim.g.firenvim_config = { localSettings = { ['.*'] = { takeover = 'never' } } }
+-- Enable commentary.nvim
+require('Comment').setup()
 
 --Remap space as leader key
 vim.api.nvim_set_keymap('', '<Space>', '<Nop>', { noremap = true, silent = true })
@@ -365,12 +363,12 @@ vim.cmd [[
 -- directory managmeent, including autochdir
 -- vim.cmd[[nnoremap <leader>cd :cd %:p:h<CR>:pwd<CR>]]
 
--- vim.api.nvim_exec([[
+-- vim.cmd [[
 --   augroup BufferCD
 --     autocmd!
 --     autocmd BufEnter * silent! Glcd
 --   augroup end
--- ]], false)
+-- ]]
 
 vim.cmd [[
   augroup nvim-luadev
@@ -399,8 +397,8 @@ vim.diagnostic.config {
 require('vim.lsp.log').set_format_func(vim.inspect)
 
 -- Add nvim-lspconfig plugin
-local nvim_lsp = require 'lspconfig'
-local on_attach = function(_, bufnr)
+local lspconfig = require 'lspconfig'
+local on_attach = function(client, bufnr)
   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
   -- Mappings.
@@ -436,6 +434,18 @@ local on_attach = function(_, bufnr)
   -- vim.cmd [[
   --   command! Format execute 'lua vim.lsp.buf.formatting()'
   -- ]]
+  if client.resolved_capabilities.document_highlight then
+    vim.cmd [[
+      hi LspReferenceRead cterm=bold ctermbg=red guibg=LightYellow
+      hi LspReferenceText cterm=bold ctermbg=red guibg=LightYellow
+      hi LspReferenceWrite cterm=bold ctermbg=red guibg=LightYellow
+      augroup lsp_document_highlight
+        autocmd! * <buffer>
+        autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+        autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+      augroup END
+    ]]
+  end
 end
 
 local handlers = {
@@ -467,7 +477,7 @@ local servers = {
   'julials',
 }
 for _, lsp in ipairs(servers) do
-  nvim_lsp[lsp].setup {
+  lspconfig[lsp].setup {
     on_attach = on_attach,
     handlers = handlers,
   }
@@ -507,7 +517,7 @@ require('lspconfig').sumneko_lua.setup {
   },
 }
 
-nvim_lsp.texlab.setup {
+lspconfig.texlab.setup {
   on_attach = on_attach,
   handlers = handlers,
   settings = {
