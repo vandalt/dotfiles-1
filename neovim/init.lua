@@ -458,20 +458,11 @@ local handlers = {
 
 local servers = {
   'clangd',
-  -- 'ccls',
-  -- 'gopls',
-  'rust_analyzer',
-  -- 'tsserver',
-  -- 'cssls',
-  -- 'bashls',
-  -- 'denols',
-  -- 'rnix',
+  'gopls',
   'ltex',
   'hls',
   'pyright',
   'yamlls',
-  -- 'angularls',
-  -- 'purescriptls',
   'jsonls',
   'julials',
 }
@@ -481,6 +472,12 @@ for _, lsp in ipairs(servers) do
     handlers = handlers,
   }
 end
+
+require('lspconfig').rust_analyzer.setup {
+  cmd = { 'rustup', 'run', 'nightly', 'rust-analyzer' },
+  on_attach = on_attach,
+  handlers = handlers,
+}
 
 -- Make runtime files discoverable to the server
 local runtime_path = vim.split(package.path, ';')
