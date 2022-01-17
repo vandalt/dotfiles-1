@@ -77,10 +77,6 @@ vim.cmd [[colorscheme onedark]]
 -- Set completeopt
 vim.o.completeopt = 'menuone,noinsert'
 
---Use filetype.lua
-vim.g.do_filetype_lua = 1
-vim.g.did_load_filetypes = 0
-
 --Add spellchecking
 vim.cmd [[ autocmd FileType gitcommit setlocal spell ]]
 vim.cmd [[ autocmd FileType markdown setlocal spell ]]
