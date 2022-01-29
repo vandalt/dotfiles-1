@@ -72,7 +72,6 @@ vim.wo.signcolumn = 'yes'
 
 --Set colorscheme (order is important here)
 vim.o.termguicolors = true
-vim.g.onedark_terminal_italics = 1
 vim.cmd [[colorscheme onedark]]
 
 -- Set completeopt
@@ -225,23 +224,23 @@ end)
 vim.keymap.set(
   'n',
   '<leader>sb',
-  require('telescope.builtin').current_buffer_fuzzy_find
+  function()
+  require('telescope.builtin').current_buffer_fuzzy_find()
+  end
 )
-vim.keymap.set('n', '<leader>h', require('telescope.builtin').help_tags)
-vim.keymap.set('n', '<leader>st', require('telescope.builtin').tags)
-vim.keymap.set('n', '<leader>?', require('telescope.builtin').oldfiles)
-vim.keymap.set('n', '<leader>sd', require('telescope.builtin').grep_string)
-vim.keymap.set('n', '<leader>sp', require('telescope.builtin').live_grep)
+vim.keymap.set('n', '<leader>h', function() require('telescope.builtin').help_tags() end)
+vim.keymap.set('n', '<leader>st', function() require('telescope.builtin').tags() end)
+vim.keymap.set('n', '<leader>?', function() require('telescope.builtin').oldfiles() end)
+vim.keymap.set('n', '<leader>sd', function() require('telescope.builtin').grep_string() end)
+vim.keymap.set('n', '<leader>sp', function() require('telescope.builtin').live_grep() end)
 
-vim.keymap.set('n', '<leader>so', function()
-  require('telescope.builtin').tags { only_current_buffer = true }
-end)
+vim.keymap.set('n', '<leader>so', function() require('telescope.builtin').tags { only_current_buffer = true } end)
 
-vim.keymap.set('n', '<leader>gc', require('telescope.builtin').git_commits)
-vim.keymap.set('n', '<leader>gb', require('telescope.builtin').git_branches)
-vim.keymap.set('n', '<leader>gs', require('telescope.builtin').git_status)
-vim.keymap.set('n', '<leader>gp', require('telescope.builtin').git_bcommits)
-vim.keymap.set('n', '<leader>wo', require('telescope.builtin').lsp_document_symbols)
+vim.keymap.set('n', '<leader>gc', function() require('telescope.builtin').git_commits() end)
+vim.keymap.set('n', '<leader>gb', function() require('telescope.builtin').git_branches() end)
+vim.keymap.set('n', '<leader>gs', function() require('telescope.builtin').git_status() end)
+vim.keymap.set('n', '<leader>gp', function() require('telescope.builtin').git_bcommits() end)
+vim.keymap.set('n', '<leader>wo', function() require('telescope.builtin').lsp_document_symbols() end)
 
 -- Fugitive shortcuts
 vim.keymap.set('n', '<leader>ga', ':Git add %:p<CR><CR>', { silent = true })
@@ -265,9 +264,6 @@ vim.keymap.set('n', '<leader>qq', ':cclose<CR>', { silent = true })
 vim.keymap.set('n', '<leader>Qo', ':lopen<CR>', { silent = true })
 vim.keymap.set('n', '<leader>Qq', ':lclose<CR>', { silent = true })
 vim.cmd [[autocmd FileType qf nnoremap <buffer> q :lclose <bar> cclose <CR> ]]
-
--- Get rid of annoying ex keybind
-vim.keymap.set('', 'Q', '<Nop>', { silent = true })
 
 -- Managing buffers
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { silent = true })
@@ -421,42 +417,20 @@ local on_attach = function(client, bufnr)
 
   local attach_opts = { silent = true, buffer = bufnr }
   -- Mappings.
-  vim.keymap.set('n', 'gD', function()
-    vim.lsp.buf.declaration()
-  end, attach_opts)
-  vim.keymap.set('n', 'gd', function()
-    vim.lsp.buf.definition()
-  end, attach_opts)
-  vim.keymap.set('n', 'K', function()
-    vim.lsp.buf.hover()
-  end, attach_opts)
-  vim.keymap.set('n', 'gi', function()
-    vim.lsp.buf.implementation()
-  end, attach_opts)
-  vim.keymap.set('n', '<C-s>', function()
-    vim.lsp.buf.signature_help()
-  end, attach_opts)
-  vim.keymap.set('n', '<leader>wa', function()
-    vim.lsp.buf.add_workspace_folder()
-  end, attach_opts)
-  vim.keymap.set('n', '<leader>wr', function()
-    vim.lsp.buf.remove_workspace_folder()
-  end, attach_opts)
+  vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, attach_opts)
+  vim.keymap.set('n', 'gd', vim.lsp.buf.definition , attach_opts)
+  vim.keymap.set('n', 'K', vim.lsp.buf.hover, attach_opts)
+  vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, attach_opts)
+  vim.keymap.set('n', '<C-s>', vim.lsp.buf.signature_help, attach_opts)
+  vim.keymap.set('n', '<leader>wa', vim.lsp.buf.add_workspace_folder, attach_opts)
+  vim.keymap.set('n', '<leader>wr', vim.lsp.buf.remove_workspace_folder, attach_opts)
   vim.keymap.set('n', '<leader>wl', function()
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, attach_opts)
-  vim.keymap.set('n', '<leader>D', function()
-    vim.lsp.buf.type_definition()
-  end, attach_opts)
-  vim.keymap.set('n', '<leader>rn', function()
-    vim.lsp.buf.rename()
-  end, attach_opts)
-  vim.keymap.set('n', 'gr', function()
-    require('telescope.builtin').lsp_references()
-  end, attach_opts)
-  vim.keymap.set('n', '<leader>ca', function()
-    vim.lsp.buf.code_action()
-  end, attach_opts)
+  vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, attach_opts)
+  vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, attach_opts)
+  vim.keymap.set('n', 'gr', function() require('telescope.builtin').lsp_references() end, attach_opts)
+  vim.keymap.set('n', '<leader>ca', vim.lsp.buf.code_action, attach_opts)
 
   -- FormatRange = function()
   --   local start_pos = vim.api.nvim_buf_get_mark(0, '<')
@@ -471,6 +445,7 @@ local on_attach = function(client, bufnr)
   -- vim.cmd [[
   --   command! Format execute 'lua vim.lsp.buf.formatting()'
   -- ]]
+
   if client.resolved_capabilities.document_highlight then
     vim.cmd [[
     augroup lsp_document_highlight
