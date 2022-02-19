@@ -273,6 +273,9 @@ vim.keymap.set('n', '<leader>Qo', ':lopen<CR>', { silent = true })
 vim.keymap.set('n', '<leader>Qq', ':lclose<CR>', { silent = true })
 vim.cmd [[autocmd FileType qf nnoremap <buffer> q :lclose <bar> cclose <CR> ]]
 
+-- Get rid of annoying ex keybind
+vim.keymap.set('', 'Q', '<Nop>', { silent = true })
+
 -- Managing buffers
 vim.keymap.set('n', '<leader>bd', ':bdelete<CR>', { silent = true })
 
