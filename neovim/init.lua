@@ -27,7 +27,8 @@ require('packer').startup(function()
   use { 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } }
   use { 'nvim-telescope/telescope-fzf-native.nvim', run = 'make' }
   use 'nvim-lualine/lualine.nvim'
-  use 'arkav/lualine-lsp-progress'
+  -- use 'arkav/lualine-lsp-progress'
+  use 'j-hui/fidget.nvim'
   -- Add indentation guides even on blank lines
   use 'lukas-reineke/indent-blankline.nvim'
   -- Add git related info in the signs columns and popups
@@ -37,10 +38,10 @@ require('packer').startup(function()
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig'
-  use 'mjlbach/onedark.nvim'
+  -- use 'mjlbach/onedark.nvim'
   -- use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
-  -- use '/home/michael/Repositories/neovim_development/onedark.nvim'
-  use '/Users/michael/Repositories/projects.nvim'
+  use '/home/michael/Repositories/neovim_development/onedark.nvim'
+  use '$HOME/Repositories/neovim_development/projects.nvim'
   use 'bfredl/nvim-luadev'
   use 'kristijanhusak/orgmode.nvim'
   use 'mhartington/formatter.nvim'
@@ -98,12 +99,19 @@ require('lualine').setup {
   sections = {
     lualine_a = { 'mode' },
     lualine_b = { 'filename' },
-    lualine_c = { 'lsp_progress' },
+    -- lualine_c = { 'lsp_progress' },
+    lualine_c = {function()
+      return vim.fn['nvim_treesitter#statusline'](90)
+    end},
     lualine_x = { 'filetype' },
     lualine_y = { 'progress' },
     lualine_z = { 'location' },
+
   },
 }
+
+-- Enable fidget for lsp progress
+require('fidget').setup()
 
 -- Enable commentary.nvim
 require('Comment').setup()
@@ -450,15 +458,15 @@ local on_attach = function(client, bufnr)
   --   command! Format execute 'lua vim.lsp.buf.formatting()'
   -- ]]
 
-  if client.resolved_capabilities.document_highlight then
-    vim.cmd [[
-    augroup lsp_document_highlight
-      autocmd! * <buffer>
-      autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-      autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-    augroup END
-  ]]
-  end
+  -- if client.resolved_capabilities.document_highlight then
+  --   vim.cmd [[
+  --   augroup lsp_document_highlight
+  --     autocmd! * <buffer>
+  --     autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+  --     autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+  --   augroup END
+  -- ]]
+  -- end
 end
 
 local handlers = {
@@ -607,6 +615,8 @@ parser_config.org = {
   },
   filetype = 'org',
 }
+
+require('orgmode').setup_ts_grammar()
 
 -- Treesitter configuration
 -- Parsers must be installed manually via :TSInstall
