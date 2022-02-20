@@ -38,10 +38,10 @@ require('packer').startup(function()
   -- Additional textobjects for treesitter
   use 'nvim-treesitter/nvim-treesitter-textobjects'
   use 'neovim/nvim-lspconfig'
-  -- use 'mjlbach/onedark.nvim'
+  use 'mjlbach/onedark.nvim'
   -- use '/home/michael/Repositories/neovim_development/nvim-lspconfig-worktrees/nvim-lspconfig'
-  use '/home/michael/Repositories/neovim_development/onedark.nvim'
-  use '$HOME/Repositories/neovim_development/projects.nvim'
+  -- use '/home/michael/Repositories/neovim_development/onedark.nvim'
+  -- use '$HOME/Repositories/neovim_development/projects.nvim'
   use 'bfredl/nvim-luadev'
   use 'kristijanhusak/orgmode.nvim'
   use 'mhartington/formatter.nvim'
@@ -192,6 +192,10 @@ require('gitsigns').setup {
     topdelete = { text = '‾' },
     changedelete = { text = '~' },
   },
+  on_attach = function(bufnr)
+    vim.keymap.set('n', '[c', require"gitsigns".prev_hunk, {buffer=bufnr})
+    vim.keymap.set('n', ']c', require"gitsigns".next_hunk, {buffer=bufnr})
+  end
 }
 
 -- Telescope
@@ -603,16 +607,6 @@ require('formatter').setup {
       end,
     },
   },
-}
-
-local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
-parser_config.org = {
-  install_info = {
-    url = 'https://github.com/milisims/tree-sitter-org',
-    revision = 'main',
-    files = { 'src/parser.c', 'src/scanner.cc' },
-  },
-  filetype = 'org',
 }
 
 require('orgmode').setup_ts_grammar()
